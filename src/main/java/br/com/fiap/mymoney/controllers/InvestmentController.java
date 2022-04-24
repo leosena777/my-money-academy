@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping("/investment")
+@RequestMapping("/investments")
 public class InvestmentController  {
      final InvestmentService investmentService;
 
@@ -67,6 +67,40 @@ public class InvestmentController  {
         var investmentModel = new InvestmentModel();
         BeanUtils.copyProperties(investmentDTO, investmentModel);
         investmentModel.setId(investmentModelOptional.get().getId());
+        return ResponseEntity.status(HttpStatus.OK).body(investmentService.save(investmentModel));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Object> partialUpdateInvestment(@PathVariable(value = "id") UUID id,
+                                                   @RequestBody InvestmentDTO investmentDTO){
+        Optional<InvestmentModel> investmentModelOptional = investmentService.findById(id);
+        if (!investmentModelOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Investimento não encontrado!");
+        }
+        var investmentModel = new InvestmentModel();
+        BeanUtils.copyProperties(investmentDTO, investmentModel);
+        investmentModel.setId(investmentModelOptional.get().getId());
+
+        if(investmentModel.getName() == null){
+            investmentModel.setName(investmentModelOptional.get().getName());
+        }
+
+        if(investmentModel.getAmount() == 0.0f){
+            investmentModel.setAmount(investmentModelOptional.get().getAmount());
+        }
+
+        if(investmentModel.getEndDate() == null){
+            investmentModel.setEndDate(investmentModelOptional.get().getEndDate());
+        }
+
+        if(investmentModel.getInitDate() == null){
+            investmentModel.setInitDate(investmentModelOptional.get().getInitDate());
+        }
+
+        if(investmentModel.getPercentagePerMonth() == 0){
+            investmentModel.setPercentagePerMonth(investmentModelOptional.get().getPercentagePerMonth());
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(investmentService.save(investmentModel));
     }
 
